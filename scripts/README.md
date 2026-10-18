@@ -68,13 +68,13 @@ scripts\tauri-build.bat --debug --no-bundle
 src-tauri\target\debug\autoowl.exe
 ```
 
-Release 构建并按 `tauri.conf.json` 生成 bundle：
+Release 构建并生成 NSIS 安装包（`src-tauri\target\release\bundle\nsis\AutoOwl_<版本>_x64-setup.exe`）：
 
 ```powershell
-scripts\tauri-build.bat
+scripts\tauri-build.bat --bundles nsis
 ```
 
-普通用户需要单个发布 EXE 时，应优先使用 `build-app.bat`。
+普通用户需要单个发布 EXE 时，应优先使用 `build-app.bat`。对外发布走 GitHub 的 tag 流程，见 `docs/发布清单.md`。
 
 ## 执行 Rust 命令
 

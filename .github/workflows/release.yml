@@ -1,0 +1,63 @@
+name: release
+
+# Push a tag `v<version>` (matching package.json, Cargo.toml and tauri.conf.json)
+# to build and publish a GitHub Release with an installer and a portable exe.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.21.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Tag must match the app version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: node scripts/version-check.mjs "$env:TAG"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.92.0
+          components: rustfmt, clippy
+      - run: pnpm install --frozen-lockfile
+      - uses: ilammy/msvc-dev-cmd@v1
+      # Same gates as CI, so a red commit is never published.
+      - run: powershell -ExecutionPolicy Bypass -File scripts/verify.ps1
+      - name: Build installer (also builds the portable exe)
+        shell: cmd
+        run: call scripts\tauri-build.bat --bundles nsis
+      - name: Publish release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $v = $env:TAG.Substring(1)
+          $setup = "AutoOwl_${v}_x64-setup.exe"
+          $portable = "AutoOwl_${v}_x64-portable.exe"
+          New-Item -ItemType Directory out | Out-Null
+          Copy-Item "src-tauri/target/release/bundle/nsis/$setup" "out/$setup"
+          Copy-Item 'src-tauri/target/release/autoowl.exe' "out/$portable"
+          $notes = @"
+          ## 下载
+
+          | 文件 | 说明 |
+          |---|---|
+          | ``$setup`` | 安装版：装到当前用户目录，有开始菜单快捷方式，可在系统设置里卸载；缺 WebView2 时会自动安装 |
+          | ``$portable`` | 便携版：下载后直接双击运行，不写注册表；需要系统已有 WebView2（Windows 11 和已更新的 Windows 10 自带） |
+
+          两个版本共用同一份数据目录 ``%APPDATA%\com.autoowl.desktop``。
+          "@
+          gh release create $env:TAG "out/$setup" "out/$portable" --verify-tag --title "AutoOwl $v" --notes $notes --generate-notes
