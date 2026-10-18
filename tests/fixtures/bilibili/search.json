@@ -1,0 +1,14 @@
+{
+  "code": 0,
+  "data": {
+    "numResults": 1,
+    "result": [
+      {
+        "bvid": "BV1fixture",
+        "title": "<em class=\"keyword\">Fixture</em> Song",
+        "author": "Uploader",
+        "pic": "//example.test/cover.jpg"
+      }
+    ]
+  }
+}

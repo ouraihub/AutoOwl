@@ -1,0 +1,7 @@
+{
+  "data": {
+    "url": "https://example.test/song.mp3",
+    "bitrate": 128,
+    "format": "mp3"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "code": 0,
+  "data": {
+    "dash": {
+      "audio": [
+        {"id": 30232, "baseUrl": "https://example.test/audio-132.m4s"},
+        {"id": 30280, "baseUrl": "https://example.test/audio-192.m4s"}
+      ]
+    },
+    "durl": [{"url": "https://example.test/fallback.mp4"}]
+  }
+}

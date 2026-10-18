@@ -1,0 +1,17 @@
+{
+  "data": {
+    "song": {
+      "totalnum": 1,
+      "list": [
+        {
+          "songname": "Fixture Song",
+          "songmid": "MID123",
+          "albumname": "Fixture Album",
+          "albummid": "ALBUM123",
+          "interval": 183,
+          "singer": [{ "name": "Artist A" }]
+        }
+      ]
+    }
+  }
+}

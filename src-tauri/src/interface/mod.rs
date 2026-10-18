@@ -1,0 +1,12 @@
+pub mod admin_commands;
+pub mod auth_commands;
+pub mod collection_commands;
+pub mod commands;
+pub mod diagnostics_commands;
+pub mod download_commands;
+pub mod history_commands;
+pub mod local_music_commands;
+pub mod mcp;
+pub mod player_commands;
+pub mod render_commands;
+pub mod settings_commands;

@@ -1,0 +1,13 @@
+{
+  "resource": [
+    {
+      "contentId": "CONTENT123",
+      "chargeAuditions": "0",
+      "rateFormats": [
+        { "formatType": "PQ", "resourceType": "2", "androidSize": "3000000", "price": "0" },
+        { "formatType": "HQ", "resourceType": "2", "androidSize": "9000000", "price": "0" },
+        { "formatType": "SQ", "resourceType": "2", "androidSize": "18000000", "price": "0", "showTag": ["vip"] }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+pub mod batch_download;
+pub mod collection;
+pub mod collection_use_case;
+pub mod diagnostics;
+pub mod download;
+pub mod local_music;
+pub mod local_mutation;
+pub mod lyrics;
+pub mod qr_login;
+pub mod render;
+pub mod search;
+pub mod switch;
+pub mod tasks;
+pub mod update;

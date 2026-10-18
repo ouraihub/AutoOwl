@@ -1,0 +1,11 @@
+{
+  "code": 1000,
+  "data": {
+    "squrl": "https://example.test/song.flac",
+    "squrl_backup": "",
+    "hqurl": "https://example.test/song.mp3",
+    "hqurl_backup": "",
+    "lqurl": "",
+    "lqurl_backup": ""
+  }
+}

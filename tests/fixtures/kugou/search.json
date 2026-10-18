@@ -1,0 +1,20 @@
+{
+  "data": {
+    "total": 1,
+    "lists": [
+      {
+        "SongName": "<em>Fixture</em> &amp; Song",
+        "SingerName": "Artist A/Artist B",
+        "AlbumName": "Fixture Album",
+        "AlbumID": "ALBUM123",
+        "Duration": 183,
+        "FileHash": "HASH123",
+        "SQFileHash": "",
+        "HQFileHash": "",
+        "ResFileHash": "",
+        "Image": "https://example.invalid/{size}.jpg",
+        "trans_param": { "ogg_320_hash": "", "ogg_128_hash": "" }
+      }
+    ]
+  }
+}

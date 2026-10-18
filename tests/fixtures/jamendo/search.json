@@ -1,0 +1,19 @@
+[
+  {
+    "id": 1001,
+    "name": "Fixture Song",
+    "duration": 210,
+    "artist": {"id": 2001, "name": "Artist A"},
+    "album": {"id": 3001, "name": "Fixture Album"},
+    "cover": {"big": {"size300": "https://example.test/cover.jpg"}},
+    "download": {"mp3": "https://example.test/song.mp3"}
+  },
+  {
+    "id": 1002,
+    "name": "Unavailable",
+    "artist": {"id": 2002, "name": "Artist B"},
+    "album": {"id": 3002, "name": "Other Album"},
+    "download": {},
+    "stream": {}
+  }
+]

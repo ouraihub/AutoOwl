@@ -1,0 +1,26 @@
+{
+  "songResultData": {
+    "totalCount": "2",
+    "result": [
+      {
+        "id": "1",
+        "name": "Fixture Song",
+        "contentId": "CONTENT123",
+        "copyrightId": "COPY123",
+        "chargeAuditions": "0",
+        "duration": 190,
+        "singers": [{"id": "A1", "name": "Artist A"}],
+        "albums": [{"id": "AL1", "name": "Fixture Album"}],
+        "imgItems": [{"imgSizeType": "02", "img": "/cover.jpg"}],
+        "rateFormats": [{"formatType": "PQ", "price": "0", "showTag": []}]
+      },
+      {
+        "id": "2",
+        "name": "Paid Song",
+        "contentId": "CONTENT999",
+        "chargeAuditions": "1",
+        "rateFormats": [{"formatType": "HQ", "price": "200", "showTag": ["vip"]}]
+      }
+    ]
+  }
+}

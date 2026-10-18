@@ -1,0 +1,26 @@
+{
+  "state": true,
+  "errno": 0,
+  "errmsg": "",
+  "data": {
+    "typeTrack": [
+      {
+        "TSID": "T100",
+        "title": "Fixture Song",
+        "albumTitle": "Fixture Album",
+        "albumAssetCode": "p200",
+        "pic": "https://example.test/cover.jpg",
+        "duration": 188,
+        "artist": [{"name": "Artist A", "artistType": 38}],
+        "isVip": 0
+      },
+      {
+        "TSID": "T999",
+        "title": "VIP Song",
+        "duration": 200,
+        "artist": [{"name": "Artist B", "artistType": 38}],
+        "isVip": 1
+      }
+    ]
+  }
+}

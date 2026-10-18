@@ -1,0 +1,40 @@
+{
+  "code": 0,
+  "data": {
+    "meta": {
+      "season_id": 778899,
+      "name": "钢琴合集",
+      "cover": "//example.test/season.jpg",
+      "mid": 24680,
+      "total": 2
+    },
+    "page": {
+      "page_num": 1,
+      "page_size": 30,
+      "total": 2
+    },
+    "archives": [
+      {
+        "aid": 11,
+        "bvid": "BV1aa4y1x7A1",
+        "title": "第一首",
+        "duration": 201,
+        "pic": "https://example.test/a1.jpg"
+      },
+      {
+        "aid": 22,
+        "bvid": "BV1bb4y1x7A2",
+        "title": "第二首",
+        "duration": 178,
+        "pic": "https://example.test/a2.jpg"
+      },
+      {
+        "aid": 33,
+        "bvid": "   ",
+        "title": "无效条目",
+        "duration": 0,
+        "pic": ""
+      }
+    ]
+  }
+}

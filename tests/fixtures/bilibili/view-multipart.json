@@ -1,0 +1,18 @@
+{
+  "code": 0,
+  "data": {
+    "bvid": "BV1aa4y1x7A1",
+    "title": "现场演奏合辑",
+    "desc": "三个分P的现场录音",
+    "pic": "//example.test/cover.jpg",
+    "owner": {
+      "mid": 24680,
+      "name": "示例 UP 主"
+    },
+    "pages": [
+      {"cid": 1001, "page": 1, "part": "开场", "duration": 120},
+      {"cid": 1002, "page": 2, "part": "中段", "duration": 245},
+      {"cid": 1003, "page": 3, "part": "", "duration": 96}
+    ]
+  }
+}

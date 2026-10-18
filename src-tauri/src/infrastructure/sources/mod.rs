@@ -1,0 +1,13 @@
+pub mod apple;
+pub mod bilibili;
+pub mod fivesing;
+pub mod jamendo;
+pub mod joox;
+pub mod kugou;
+pub mod kuwo;
+pub mod migu;
+pub mod netease;
+pub mod qianqian;
+pub mod qq;
+pub mod registry;
+pub mod soda;

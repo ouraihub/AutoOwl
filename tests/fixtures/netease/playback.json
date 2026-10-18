@@ -1,0 +1,9 @@
+{
+  "data": [
+    {
+      "url": "https://example.test/song.mp3",
+      "code": 200,
+      "br": 320000
+    }
+  ]
+}

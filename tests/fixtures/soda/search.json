@@ -1,0 +1,24 @@
+{
+  "result_groups": [
+    {
+      "data": [
+        {
+          "entity": {
+            "track": {
+              "id": "7300000000000000001",
+              "name": "Fixture Song",
+              "duration": 201000,
+              "artists": [{"name": "Artist A"}],
+              "album": {
+                "id": "ALBUM1",
+                "name": "Fixture Album",
+                "url_cover": {"urls": ["https://example.test/cover"]}
+              }
+            }
+          }
+        },
+        {"entity": {"track": {"id": "", "name": "Invalid"}}}
+      ]
+    }
+  ]
+}

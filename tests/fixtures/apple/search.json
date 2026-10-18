@@ -1,0 +1,19 @@
+{
+  "results": {
+    "songs": {
+      "data": [
+        {
+          "id": "APPLE100",
+          "type": "songs",
+          "attributes": {
+            "name": "Fixture Song",
+            "artistName": "Artist A",
+            "albumName": "Fixture Album",
+            "durationInMillis": 205000,
+            "artwork": {"url": "https://example.test/{w}x{h}.jpg"}
+          }
+        }
+      ]
+    }
+  }
+}

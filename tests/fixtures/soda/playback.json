@@ -1,0 +1,25 @@
+{
+  "status_code": 0,
+  "track_player": {
+    "url_player_info": "",
+    "video_model": {
+      "encrypt_info": {"spade_a": "auth-token"},
+      "track": {
+        "play_info_list": [
+          {
+            "main_play_url": "https://example.test/128.m4a",
+            "quality": "standard",
+            "bitrate": 128000,
+            "size": 4000000
+          },
+          {
+            "main_play_url": "https://example.test/encrypted.m4a",
+            "quality": "lossless",
+            "bitrate": 1200000,
+            "size": 32000000
+          }
+        ]
+      }
+    }
+  }
+}

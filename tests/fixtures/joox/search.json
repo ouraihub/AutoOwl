@@ -1,0 +1,26 @@
+{
+  "section_list": [
+    {
+      "item_list": [
+        {
+          "song": [
+            {
+              "song_info": {
+                "id": "JOOX123",
+                "name": "Fixture Song",
+                "album_name": "Fixture Album",
+                "artist_list": [{"name": "Artist A"}],
+                "play_duration": 180,
+                "images": [
+                  {"width": 100, "url": "https://example.test/100.jpg"},
+                  {"width": 300, "url": "https://example.test/300.jpg"}
+                ],
+                "vip_flag": 0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

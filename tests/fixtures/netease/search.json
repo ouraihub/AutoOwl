@@ -1,0 +1,23 @@
+{
+  "result": {
+    "songCount": 2,
+    "songs": [
+      {
+        "id": 123,
+        "name": "Fixture Song",
+        "ar": [{ "id": 7, "name": "Artist A" }],
+        "al": { "id": 9, "name": "Fixture Album", "picUrl": "https://example.invalid/cover.jpg" },
+        "dt": 183000,
+        "privilege": { "fl": 320000 }
+      },
+      {
+        "id": 456,
+        "name": "Unavailable Song",
+        "ar": [{ "id": 8, "name": "Artist B" }],
+        "al": { "id": 10, "name": "Other Album", "picUrl": null },
+        "dt": 200000,
+        "privilege": { "fl": 0 }
+      }
+    ]
+  }
+}

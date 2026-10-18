@@ -1,0 +1,18 @@
+node_modules/
+.svelte-kit/
+build/
+dist/
+.corepack/
+src-tauri/target/
+src-tauri/gen/
+*.db
+*.db-shm
+*.db-wal
+/logs/
+.env
+.env.*
+!.env.example
+# Local scratch: protocol captures (may hold tokens), agent notes, build logs.
+.probe/
+.omp/
+*.log

@@ -1,0 +1,72 @@
+[package]
+name = "autoowl"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-only"
+repository = "https://github.com/ouraihub/AutoOwl"
+# `src/bin/autoowl-cli.rs` is a second binary; `tauri build`/`cargo run` mean the app.
+default-run = "autoowl"
+
+[lib]
+name = "autoowl_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2.7.3"
+tauri-plugin-opener = "2.5.5"
+thiserror = "2"
+tracing = "0.1"
+async-trait = "0.1"
+rusqlite = { version = "0.40", features = ["bundled", "fallible_uint"] }
+# Shared desktop kit (github.com/ouraihub/Aether, same pinning as AutoNote): rotating
+# file logs, the loopback MCP server, in-app AI chat (providers + chat), and the
+# Tauri plugin behind their settings UI. Bump every `rev` together with
+# `@ouraihub/aether-ui` in package.json.
+aether-observability = { git = "https://github.com/ouraihub/Aether.git", rev = "d7391853cf6427ca3014f7b75d782e655532d3c7" }
+aether-mcp-server = { git = "https://github.com/ouraihub/Aether.git", rev = "d7391853cf6427ca3014f7b75d782e655532d3c7" }
+aether-providers = { git = "https://github.com/ouraihub/Aether.git", rev = "d7391853cf6427ca3014f7b75d782e655532d3c7" }
+aether-chat = { git = "https://github.com/ouraihub/Aether.git", rev = "d7391853cf6427ca3014f7b75d782e655532d3c7" }
+tauri-plugin-aether = { git = "https://github.com/ouraihub/Aether.git", rev = "d7391853cf6427ca3014f7b75d782e655532d3c7", features = ["mcp-server", "providers", "chat"] }
+reqwest = { version = "0.12", default-features = false, features = [
+  "rustls-tls",
+  "json",
+  "stream",
+  "gzip",
+] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "fs", "io-util", "process"] }
+futures-util = "0.3"
+lofty = "0.25"
+aes = "0.8"
+base64 = "0.22"
+cbc = "0.1"
+hex = "0.4"
+md5 = "0.7"
+num-bigint = "0.4"
+# QR rendering only: netease/bilibili hand back a login URL, not an image.
+# `default-features = false` drops the `image`/`svg`/`pic` renderers (and with
+# them the whole `image` tree) leaving a dependency-free pure-Rust encoder; the
+# PNG bytes are produced by `application::qr_login::png`.
+qrcode = { version = "0.14", default-features = false }
+rand = "0.8"
+sha1 = "0.10"
+
+# DPAPI for cookies at rest (infrastructure::secret). Same major as tauri's own
+# `windows` dependency, so this adds features, not a second copy of the crate.
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62", features = ["Win32_Security_Cryptography", "Win32_Foundation"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt", "rt-multi-thread", "time"] }
+tempfile = "3"
+
+[lints.clippy]
+unwrap_used = "warn"
+expect_used = "warn"
+todo = "warn"
+unimplemented = "warn"

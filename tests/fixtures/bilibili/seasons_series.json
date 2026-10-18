@@ -1,0 +1,41 @@
+{
+  "code": 0,
+  "data": {
+    "items_lists": [
+      {
+        "seasons_list": [
+          {
+            "meta": {
+              "season_id": 778899,
+              "name": "钢琴合集",
+              "cover": "//example.test/season.jpg",
+              "description": "合集简介",
+              "mid": 24680,
+              "mid_name": "示例 UP 主",
+              "total": 3
+            },
+            "recent_aids": [11, 22, 33]
+          }
+        ],
+        "series_list": [
+          {
+            "meta": {
+              "series_id": 445566,
+              "name": "翻唱系列",
+              "cover": "https://example.test/series.jpg",
+              "description": "",
+              "mid": 24680,
+              "mid_name": "示例 UP 主"
+            },
+            "recent_aids": [44, 55]
+          }
+        ]
+      }
+    ],
+    "items_lists_page": {
+      "page_num": 1,
+      "page_size": 20,
+      "total": 2
+    }
+  }
+}

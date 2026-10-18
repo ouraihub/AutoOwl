@@ -1,0 +1,23 @@
+{
+  "TOTAL": "2",
+  "abslist": [
+    {
+      "MUSICRID": "MUSIC_12345",
+      "SONGNAME": "Fixture Song",
+      "ARTIST": "Artist A&Artist B",
+      "ALBUM": "Fixture Album",
+      "DURATION": "186",
+      "hts_MVPIC": "http://img.example/cover.jpg",
+      "bitSwitch": 1
+    },
+    {
+      "MUSICRID": "MUSIC_99999",
+      "SONGNAME": "Unavailable",
+      "ARTIST": "Artist C",
+      "ALBUM": "",
+      "DURATION": "120",
+      "hts_MVPIC": "",
+      "bitSwitch": 0
+    }
+  ]
+}

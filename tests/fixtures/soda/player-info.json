@@ -1,0 +1,26 @@
+{
+  "Result": {
+    "Data": {
+      "PlayInfoList": [
+        {
+          "MainPlayUrl": "https://example.test/128.m4a",
+          "PlayAuth": "",
+          "Quality": "standard",
+          "Format": "m4a",
+          "Bitrate": 128000,
+          "Size": 4000000,
+          "Duration": 210
+        },
+        {
+          "MainPlayUrl": "https://example.test/320.m4a",
+          "PlayAuth": "",
+          "Quality": "higher",
+          "Format": "m4a",
+          "Bitrate": 320000,
+          "Size": 9000000,
+          "Duration": 210
+        }
+      ]
+    }
+  }
+}
