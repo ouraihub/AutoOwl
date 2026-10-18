@@ -61,6 +61,14 @@ impl Default for ReqwestHttpClient {
     }
 }
 
+impl ReqwestHttpClient {
+    /// The shared client, for callers that need headers/status/streaming
+    /// beyond the trait methods (the `stream://` playback proxy).
+    pub fn raw(&self) -> &reqwest::Client {
+        &self.client
+    }
+}
+
 #[async_trait]
 impl HttpClient for ReqwestHttpClient {
     async fn get(&self, url: &str) -> Result<HttpResponse, HttpError> {

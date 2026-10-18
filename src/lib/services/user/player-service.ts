@@ -25,10 +25,16 @@ export function attachAudio(element: HTMLAudioElement): void {
   audio = element;
 }
 
-/** Point the element at a resolved stream URL and load it. */
-export function setSourceUrl(url: string): void {
+/**
+ * Point the element at a resolved stream URL and load it. Remote URLs go through
+ * the `stream` protocol so Rust can add the source's Referer/User-Agent/Cookie,
+ * which `<audio>` cannot send (bilibili and migu CDNs reject requests without them).
+ */
+export function setSourceUrl(url: string, source: string): void {
   if (typeof window === 'undefined' || audio === null) return;
-  audio.src = url;
+  audio.src = /^https?:\/\//i.test(url)
+    ? `http://stream.localhost/?${new URLSearchParams({ source, url })}`
+    : url;
   audio.load();
 }
 

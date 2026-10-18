@@ -153,10 +153,10 @@
   /** Point the element at each newly resolved stream exactly once. */
   let appliedUrl = '';
   $effect(() => {
-    const url = playerStore.resolution?.resource.url;
-    if (url === undefined || url === appliedUrl) return;
-    appliedUrl = url;
-    playerService.setSourceUrl(url);
+    const resource = playerStore.resolution?.resource;
+    if (resource === undefined || resource.url === appliedUrl) return;
+    appliedUrl = resource.url;
+    playerService.setSourceUrl(resource.url, resource.song.source);
   });
 
   /**

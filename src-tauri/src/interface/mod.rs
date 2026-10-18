@@ -11,3 +11,4 @@ pub mod player_commands;
 pub mod render_commands;
 pub mod settings_commands;
 pub mod storage_commands;
+pub mod stream_protocol;

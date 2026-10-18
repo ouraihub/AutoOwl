@@ -74,6 +74,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(aether)
+        .register_asynchronous_uri_scheme_protocol("stream", interface::stream_protocol::handle)
         .setup(move |app| {
             use tauri::Manager;
             tracing::info!(event = "data_root_resolved", path = %root.display());

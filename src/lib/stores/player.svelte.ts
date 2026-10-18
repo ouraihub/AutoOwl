@@ -105,7 +105,7 @@ export class PlayerStore {
     try {
       const resolved = await playerService.resolvePlayback(song);
       this.resolution = resolved;
-      playerService.setSourceUrl(resolved.resource.url);
+      playerService.setSourceUrl(resolved.resource.url, resolved.resource.song.source);
       // `load` re-seeds the backend duration from song metadata, which is often
       // absent. Re-arm so the decoded duration is reported again, even when the
       // same track is replayed.
@@ -132,7 +132,7 @@ export class PlayerStore {
     this.loading = true;
     try {
       const outcome = await playerService.switchSource(song);
-      playerService.setSourceUrl(outcome.resource.url);
+      playerService.setSourceUrl(outcome.resource.url, outcome.resource.song.source);
       this.reportedDurationKey = '';
       // The alternative is a different platform's recording of the same track,
       // so the backend must be loaded with the new ref while the user-visible
