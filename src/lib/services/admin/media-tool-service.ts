@@ -11,5 +11,10 @@ export const mediaToolService = {
    */
   getStatus(): Promise<MediaToolStatus> {
     return client.invoke<MediaToolStatus>('get_media_tool_status');
+  },
+
+  /** Runs `scoop install ffmpeg`; rejects with the reason when Scoop is missing or fails. */
+  installWithScoop(): Promise<MediaToolStatus> {
+    return client.invoke<MediaToolStatus>('install_media_tools');
   }
 };

@@ -114,6 +114,7 @@ pub fn run() {
             interface::settings_commands::get_settings,
             interface::settings_commands::update_settings,
             interface::settings_commands::get_media_tool_status,
+            interface::settings_commands::install_media_tools,
             interface::render_commands::start_video_render,
             interface::diagnostics_commands::get_diagnostics,
             interface::diagnostics_commands::check_update,

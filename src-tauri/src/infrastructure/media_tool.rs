@@ -230,7 +230,62 @@ pub fn resolve(
         }
     }
 
-    search_path(kind.binary_name(), ctx).ok_or_else(|| ResolveFailure::not_found(kind))
+    search_path(kind.binary_name(), ctx)
+        .or_else(|| search_scoop_shims(kind.binary_name(), ctx))
+        .ok_or_else(|| ResolveFailure::not_found(kind))
+}
+
+/// Scoop's shims directory: `%SCOOP%\shims`, else `%USERPROFILE%\scoop\shims`.
+fn scoop_shims(env: &dyn Fn(&str) -> Option<String>) -> Option<PathBuf> {
+    env("SCOOP")
+        .filter(|root| !root.trim().is_empty())
+        .map(PathBuf::from)
+        .or_else(|| env("USERPROFILE").map(|home| PathBuf::from(home).join("scoop")))
+        .map(|root| root.join("shims"))
+}
+
+/// After `scoop install`, the shims are on the user's PATH but not on this
+/// process's (inherited at launch), so look there directly instead of
+/// requiring a restart.
+fn search_scoop_shims(binary: &str, ctx: &ResolutionContext<'_>) -> Option<PathBuf> {
+    let shims = scoop_shims(ctx.env)?;
+    name_variants(binary)
+        .into_iter()
+        .map(|variant| shims.join(variant))
+        .find(|candidate| (ctx.verify)(candidate))
+}
+
+/// Installs ffmpeg (which ships ffprobe) with Scoop, without a console window.
+///
+/// Scoop installs per user and needs no admin rights. Errors are Chinese and
+/// shown as-is: "Scoop not installed" is the common case, and the page then
+/// points to manual install instead.
+pub async fn install_with_scoop() -> Result<(), String> {
+    let scoop = scoop_shims(&system_env)
+        .map(|shims| shims.join("scoop.cmd"))
+        .filter(|cmd| cmd.is_file())
+        .ok_or_else(|| "未检测到 Scoop，请先安装 Scoop（scoop.sh）或手动安装 ffmpeg".to_owned())?;
+    let mut command = tokio::process::Command::new(scoop);
+    command
+        .args(["install", "ffmpeg"])
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
+    hide_console_async(&mut command);
+    let output = command
+        .output()
+        .await
+        .map_err(|error| format!("Scoop 启动失败：{error}"))?;
+    if output.status.success() {
+        return Ok(());
+    }
+    let log = String::from_utf8_lossy(&output.stderr);
+    let last = log
+        .lines()
+        .rev()
+        .find(|line| !line.trim().is_empty())
+        .unwrap_or("未知错误");
+    Err(format!("Scoop 安装 ffmpeg 失败：{}", last.trim()))
 }
 
 /// Resolution outcome for both tools.
@@ -649,6 +704,28 @@ mod tests {
 
         let resolved: PathBuf = resolve(MediaToolKind::Ffprobe, &ctx).expect("resolved");
         assert_eq!(resolved.parent(), Some(path_dir.as_path()));
+    }
+
+    #[test]
+    fn finds_scoop_shims_missing_from_this_process_path() {
+        // `scoop install` updates the user PATH, not the running app's, so the
+        // shims directory is checked directly; `SCOOP` wins over the default.
+        let dir = tempfile::tempdir().expect("temp dir");
+        let custom = dir.path().join("custom");
+        let shims = custom.join("shims");
+        let env = env_from(&[
+            ("PATH", &dir.path().join("empty").display().to_string()),
+            ("SCOOP", &custom.display().to_string()),
+            ("USERPROFILE", &dir.path().display().to_string()),
+        ]);
+        let ctx = ResolutionContext {
+            env: &|name| env.get(name).cloned(),
+            bundled_dir: None,
+            verify: &|candidate: &Path| candidate.parent() == Some(shims.as_path()),
+        };
+
+        let resolved = resolve(MediaToolKind::Ffmpeg, &ctx).expect("resolved");
+        assert_eq!(resolved.parent(), Some(shims.as_path()));
     }
 
     #[test]

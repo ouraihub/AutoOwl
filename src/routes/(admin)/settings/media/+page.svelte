@@ -12,6 +12,8 @@
   import RefreshCw from '@lucide/svelte/icons/refresh-cw';
   import CircleCheck from '@lucide/svelte/icons/circle-check';
   import CircleX from '@lucide/svelte/icons/circle-x';
+  import Download from '@lucide/svelte/icons/download';
+  import { toAppError } from '$lib/services/errors';
 
   /**
    * `getStatus` resolves even when a tool is missing — absence arrives as
@@ -19,6 +21,7 @@
    */
   let status = $state<MediaToolStatus | null>(null);
   let loading = $state(false);
+  let installing = $state(false);
 
   async function load(): Promise<void> {
     loading = true;
@@ -32,14 +35,23 @@
 
   async function refresh(): Promise<void> {
     await load();
-    const current = status;
-    if (current && current.ffmpeg && current.ffprobe) {
-      notify.success('媒体工具就绪', 'ffmpeg 与 ffprobe 均已找到');
-    } else {
-      notify.info('已重新检测', '仍有工具缺失');
+    if (status?.ffmpeg) notify.success('媒体工具就绪', '已找到 ffmpeg');
+    else notify.info('已重新检测', '仍未找到 ffmpeg');
+  }
+
+  async function install(): Promise<void> {
+    installing = true;
+    try {
+      status = await mediaToolService.installWithScoop();
+      notify.success('ffmpeg 已安装', '视频导出现在可用');
+    } catch (cause) {
+      notify.fromError(toAppError(cause), 'ffmpeg 安装失败');
+    } finally {
+      installing = false;
     }
   }
 
+  // Only video export runs ffmpeg; tags, covers and lyrics are written without it.
   const tools = $derived(
     status === null
       ? []
@@ -49,19 +61,19 @@
             available: status.ffmpeg,
             path: status.ffmpegPath,
             error: status.ffmpegError,
-            purpose: '写入元数据、转码与视频导出'
+            purpose: '视频导出'
           },
           {
             name: 'ffprobe',
             available: status.ffprobe,
             path: status.ffprobePath,
             error: status.ffprobeError,
-            purpose: '读取音频时长与格式信息'
+            purpose: '随 ffmpeg 一起安装，目前没有功能依赖它'
           }
         ]
   );
 
-  const missing = $derived(tools.filter((tool) => !tool.available).map((tool) => tool.name));
+  const ffmpegMissing = $derived(status !== null && !status.ffmpeg);
 </script>
 
 <div class="mx-auto max-w-3xl space-y-6 p-6">
@@ -69,10 +81,10 @@
     <div>
       <h1 class="text-2xl font-semibold tracking-tight">媒体工具</h1>
       <p class="text-muted-foreground mt-1 text-sm">
-        ffmpeg 与 ffprobe 的检测结果。缺失时下载仍可用，但元数据写入与视频导出会被跳过。
+        只有「视频导出」需要 ffmpeg。搜索、播放、下载，以及写入封面、标签和歌词都不需要。
       </p>
     </div>
-    <Button variant="outline" size="sm" disabled={loading} onclick={refresh} class="shrink-0">
+    <Button variant="outline" size="sm" disabled={loading || installing} onclick={refresh} class="shrink-0">
       <RefreshCw class="size-4" />
       {loading ? '检测中…' : '重新检测'}
     </Button>
@@ -88,18 +100,22 @@
       </Card.Content>
     </Card.Root>
   {:else}
-    {#if missing.length > 0}
-      <Alert.Root variant="destructive">
+    {#if ffmpegMissing}
+      <Alert.Root>
         <TriangleAlert />
-        <Alert.Title>缺少 {missing.join(' 与 ')}</Alert.Title>
+        <Alert.Title>未安装 ffmpeg：视频导出不可用</Alert.Title>
         <Alert.Description>
-          <p>音乐下载不受影响，但以下功能不可用：写入封面与标签、格式转换、生成导出视频。</p>
-          <p class="mt-2">
-            安装方式：Windows 可用 <code class="text-foreground">winget install Gyan.FFmpeg</code>
-            或从 ffmpeg.org 下载压缩包，解压后把 <code class="text-foreground">bin</code> 目录加入系统
-            <code class="text-foreground">PATH</code>；macOS 用
-            <code class="text-foreground">brew install ffmpeg</code>；Linux 用发行版包管理器安装
-            <code class="text-foreground">ffmpeg</code>。安装完成后点击右上角「重新检测」。
+          <p>其他功能不受影响。用 Scoop 安装只需一步，不需要管理员权限。</p>
+          <div class="mt-3 flex flex-wrap items-center gap-2">
+            <Button size="sm" disabled={installing} onclick={install}>
+              <Download class="size-4" />
+              {installing ? '正在用 Scoop 安装…（可能需要几分钟）' : '用 Scoop 安装 ffmpeg'}
+            </Button>
+          </div>
+          <p class="mt-3">
+            没有 Scoop 时可手动安装：<code class="text-foreground">winget install Gyan.FFmpeg</code>，
+            或从 ffmpeg.org 下载后把 <code class="text-foreground">bin</code> 目录加入
+            <code class="text-foreground">PATH</code>，再点右上角「重新检测」。
           </p>
         </Alert.Description>
       </Alert.Root>
@@ -108,7 +124,7 @@
     <Card.Root>
       <Card.Header>
         <Card.Title>检测结果</Card.Title>
-        <Card.Description>可执行文件按系统 PATH 与内置路径依次查找。</Card.Description>
+        <Card.Description>依次查找：环境变量 AUTOOWL_FFMPEG、程序目录、系统 PATH、Scoop。</Card.Description>
       </Card.Header>
       <Card.Content class="space-y-4">
         {#each tools as tool, index (tool.name)}

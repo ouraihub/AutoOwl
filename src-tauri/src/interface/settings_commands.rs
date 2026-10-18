@@ -52,3 +52,13 @@ pub async fn get_media_tool_status() -> MediaToolStatus {
         ffprobe_error: Some("媒体工具检测失败".to_owned()),
     })
 }
+
+/// Installs ffmpeg with Scoop, then reports the fresh detection result.
+/// Takes minutes on a slow link; the page shows progress until it resolves.
+#[tauri::command]
+pub async fn install_media_tools() -> Result<MediaToolStatus, IpcError> {
+    crate::infrastructure::media_tool::install_with_scoop()
+        .await
+        .map_err(|message| IpcError::new("INSTALL_FAILED", &message, true, "media".to_owned()))?;
+    Ok(get_media_tool_status().await)
+}
