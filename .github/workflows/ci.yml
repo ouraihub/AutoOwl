@@ -21,4 +21,7 @@ jobs:
           toolchain: 1.92.0
           components: rustfmt, clippy
       - run: pnpm install --frozen-lockfile
+      # Puts the runner's MSVC (cl.exe, link.exe) on PATH; scripts/cargo-msvc.bat then
+      # skips the local portable-MSVC path. Same approach as Aether's CI.
+      - uses: ilammy/msvc-dev-cmd@v1
       - run: powershell -ExecutionPolicy Bypass -File scripts/verify.ps1
