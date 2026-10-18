@@ -19,9 +19,15 @@ pub fn update_settings(
     state: State<'_, AppState>,
     settings: AppSettings,
 ) -> Result<AppSettings, IpcError> {
-    let normalized = settings.normalize();
-    *state.settings.lock().map_err(|_| state_error())? = normalized.clone();
-    Ok(normalized)
+    state.update_settings(settings).map_err(|error| {
+        tracing::error!(event = "settings_save_failed", %error);
+        IpcError::new(
+            "SETTINGS_SAVE_FAILED",
+            "设置保存失败",
+            true,
+            "settings".to_owned(),
+        )
+    })
 }
 
 fn state_error() -> IpcError {
@@ -50,6 +56,7 @@ pub async fn get_media_tool_status() -> MediaToolStatus {
         ffprobe_path: None,
         ffmpeg_error: Some("媒体工具检测失败".to_owned()),
         ffprobe_error: Some("媒体工具检测失败".to_owned()),
+        scoop_available: false,
     })
 }
 
@@ -60,5 +67,38 @@ pub async fn install_media_tools() -> Result<MediaToolStatus, IpcError> {
     crate::infrastructure::media_tool::install_with_scoop()
         .await
         .map_err(|message| IpcError::new("INSTALL_FAILED", &message, true, "media".to_owned()))?;
+    Ok(get_media_tool_status().await)
+}
+
+/// Downloads the pinned portable ffmpeg into `<data>\tools\ffmpeg`, through the
+/// GitHub proxy when enabled. Emits `media:ffmpeg-progress` `{ received, total }`.
+#[tauri::command]
+pub async fn install_portable_ffmpeg(app: tauri::AppHandle) -> Result<MediaToolStatus, IpcError> {
+    use tauri::{Emitter, Manager};
+    let (target, proxy) = {
+        let state = app.state::<AppState>();
+        let settings = state.settings_snapshot();
+        (
+            state.paths.ffmpeg_dir(),
+            settings.update_proxy().map(str::to_owned),
+        )
+    };
+    // ponytail: emits per ~1 MiB step, enough for a progress bar; no time throttle.
+    let last = std::sync::atomic::AtomicU64::new(0);
+    crate::infrastructure::ffmpeg_download::install(
+        &target,
+        proxy.as_deref(),
+        |received, total| {
+            let step = received >> 20;
+            if last.swap(step, std::sync::atomic::Ordering::Relaxed) != step || received == total {
+                let _ = app.emit(
+                    "media:ffmpeg-progress",
+                    serde_json::json!({ "received": received, "total": total }),
+                );
+            }
+        },
+    )
+    .await
+    .map_err(|message| IpcError::new("INSTALL_FAILED", &message, true, "media".to_owned()))?;
     Ok(get_media_tool_status().await)
 }

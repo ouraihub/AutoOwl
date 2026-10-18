@@ -73,8 +73,9 @@ impl ResolveFailure {
 pub struct ResolutionContext<'a> {
     /// Environment reader. `PATH` is read through here as well.
     pub env: &'a dyn Fn(&str) -> Option<String>,
-    /// Directory holding a bundled binary, normally the executable's directory.
-    pub bundled_dir: Option<PathBuf>,
+    /// Directories checked after the env override and before `PATH`, in order:
+    /// the executable's directory, then `<data>\tools\ffmpeg` (our own download).
+    pub bundled_dirs: Vec<PathBuf>,
     /// Candidate acceptance test; production runs `<candidate> -version`.
     pub verify: &'a dyn Fn(&Path) -> bool,
 }
@@ -84,7 +85,7 @@ impl ResolutionContext<'_> {
     pub fn system() -> ResolutionContext<'static> {
         ResolutionContext {
             env: &system_env,
-            bundled_dir: bundled_dir(),
+            bundled_dirs: bundled_dirs(),
             verify: &answers_version,
         }
     }
@@ -94,11 +95,23 @@ fn system_env(name: &str) -> Option<String> {
     std::env::var(name).ok()
 }
 
-/// Directory the running executable lives in; bundled sidecars sit beside it.
-fn bundled_dir() -> Option<PathBuf> {
+/// Where `install_portable_ffmpeg` puts the binaries; set once at startup,
+/// because resolution runs from places that have no `AppState`.
+static DOWNLOADED_DIR: std::sync::OnceLock<PathBuf> = std::sync::OnceLock::new();
+
+/// Registers `<data>\tools\ffmpeg` as a search location.
+pub fn set_downloaded_dir(dir: PathBuf) {
+    let _ = DOWNLOADED_DIR.set(dir);
+}
+
+/// Executable's directory (bundled sidecars), then the downloaded copy.
+fn bundled_dirs() -> Vec<PathBuf> {
     std::env::current_exe()
         .ok()
         .and_then(|exe| exe.parent().map(Path::to_path_buf))
+        .into_iter()
+        .chain(DOWNLOADED_DIR.get().cloned())
+        .collect()
 }
 
 /// Executable name variants to try for a bare tool name.
@@ -220,14 +233,14 @@ pub fn resolve(
         }
     }
 
-    if let Some(directory) = ctx.bundled_dir.as_ref() {
-        let bundled = name_variants(kind.binary_name())
+    let bundled = ctx.bundled_dirs.iter().find_map(|directory| {
+        name_variants(kind.binary_name())
             .into_iter()
             .map(|variant| directory.join(variant))
-            .find(|candidate| (ctx.verify)(candidate));
-        if let Some(found) = bundled {
-            return Ok(found);
-        }
+            .find(|candidate| (ctx.verify)(candidate))
+    });
+    if let Some(found) = bundled {
+        return Ok(found);
     }
 
     search_path(kind.binary_name(), ctx)
@@ -255,16 +268,20 @@ fn search_scoop_shims(binary: &str, ctx: &ResolutionContext<'_>) -> Option<PathB
         .find(|candidate| (ctx.verify)(candidate))
 }
 
+/// `scoop.cmd` in the user's Scoop shims, if Scoop is installed.
+pub fn scoop_cmd() -> Option<PathBuf> {
+    scoop_shims(&system_env)
+        .map(|shims| shims.join("scoop.cmd"))
+        .filter(|cmd| cmd.is_file())
+}
+
 /// Installs ffmpeg (which ships ffprobe) with Scoop, without a console window.
 ///
 /// Scoop installs per user and needs no admin rights. Errors are Chinese and
-/// shown as-is: "Scoop not installed" is the common case, and the page then
-/// points to manual install instead.
+/// shown as-is; without Scoop the page offers the portable download instead.
 pub async fn install_with_scoop() -> Result<(), String> {
-    let scoop = scoop_shims(&system_env)
-        .map(|shims| shims.join("scoop.cmd"))
-        .filter(|cmd| cmd.is_file())
-        .ok_or_else(|| "未检测到 Scoop，请先安装 Scoop（scoop.sh）或手动安装 ffmpeg".to_owned())?;
+    let scoop =
+        scoop_cmd().ok_or_else(|| "未检测到 Scoop，请改用「下载 ffmpeg」或手动安装".to_owned())?;
     let mut command = tokio::process::Command::new(scoop);
     command
         .args(["install", "ffmpeg"])
@@ -314,6 +331,7 @@ impl MediaToolPaths {
             ffprobe_path: path_string(&self.ffprobe),
             ffmpeg_error: failure_string(&self.ffmpeg),
             ffprobe_error: failure_string(&self.ffprobe),
+            scoop_available: scoop_cmd().is_some(),
         }
     }
 }
@@ -555,6 +573,7 @@ impl MediaTool for FfmpegMediaTool {
             ffprobe_path: path_string(&self.ffprobe),
             ffmpeg_error: failure_string(&self.ffmpeg),
             ffprobe_error: failure_string(&self.ffprobe),
+            scoop_available: scoop_cmd().is_some(),
         }
     }
 }
@@ -574,7 +593,7 @@ mod tests {
     fn barren<'a>() -> ResolutionContext<'a> {
         ResolutionContext {
             env: &|_| None,
-            bundled_dir: None,
+            bundled_dirs: Vec::new(),
             verify: &|_| false,
         }
     }
@@ -612,7 +631,7 @@ mod tests {
         let env = env_from(&[("AUTOOWL_FFMPEG", &as_string)]);
         let ctx = ResolutionContext {
             env: &|name| env.get(name).cloned(),
-            bundled_dir: None,
+            bundled_dirs: Vec::new(),
             // A directory must be refused even if the verifier is permissive.
             verify: &|_| true,
         };
@@ -636,7 +655,7 @@ mod tests {
         let env = env_from(&[("AUTOOWL_FFMPEG", &as_string)]);
         let ctx = ResolutionContext {
             env: &|name| env.get(name).cloned(),
-            bundled_dir: None,
+            bundled_dirs: Vec::new(),
             verify: &|_| false,
         };
 
@@ -654,7 +673,7 @@ mod tests {
         let env = env_from(&[("AUTOOWL_FFPROBE", &as_string)]);
         let ctx = ResolutionContext {
             env: &|name| env.get(name).cloned(),
-            bundled_dir: None,
+            bundled_dirs: Vec::new(),
             verify: &|_| true,
         };
 
@@ -675,7 +694,7 @@ mod tests {
         let env = env_from(&[("PATH", &path_dir.display().to_string())]);
         let ctx = ResolutionContext {
             env: &|name| env.get(name).cloned(),
-            bundled_dir: Some(bundled.clone()),
+            bundled_dirs: vec![bundled.clone()],
             verify: &|candidate: &Path| {
                 candidate
                     .file_stem()
@@ -694,7 +713,7 @@ mod tests {
         let env = env_from(&[("PATH", &path_dir.display().to_string())]);
         let ctx = ResolutionContext {
             env: &|name| env.get(name).cloned(),
-            bundled_dir: None,
+            bundled_dirs: Vec::new(),
             verify: &|candidate: &Path| {
                 candidate
                     .file_stem()
@@ -720,7 +739,7 @@ mod tests {
         ]);
         let ctx = ResolutionContext {
             env: &|name| env.get(name).cloned(),
-            bundled_dir: None,
+            bundled_dirs: Vec::new(),
             verify: &|candidate: &Path| candidate.parent() == Some(shims.as_path()),
         };
 

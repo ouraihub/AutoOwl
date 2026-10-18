@@ -16,4 +16,7 @@ pub struct MediaToolStatus {
     /// Chinese explanation, present only when `ffmpeg` is false.
     pub ffmpeg_error: Option<String>,
     pub ffprobe_error: Option<String>,
+    /// Scoop is installed, so the page offers "install with Scoop"; otherwise
+    /// it offers the pinned portable download.
+    pub scoop_available: bool,
 }

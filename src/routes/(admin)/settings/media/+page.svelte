@@ -22,6 +22,8 @@
   let status = $state<MediaToolStatus | null>(null);
   let loading = $state(false);
   let installing = $state(false);
+  /** Download progress 0-100 while the portable install runs. */
+  let percent = $state<number | null>(null);
 
   async function load(): Promise<void> {
     loading = true;
@@ -41,12 +43,20 @@
 
   async function install(): Promise<void> {
     installing = true;
+    const portable = !status?.scoopAvailable;
+    const unlisten = portable
+      ? await mediaToolService.onDownloadProgress((received, total) => {
+          percent = Math.floor((received / total) * 100);
+        })
+      : null;
     try {
-      status = await mediaToolService.installWithScoop();
+      status = portable ? await mediaToolService.downloadPortable() : await mediaToolService.installWithScoop();
       notify.success('ffmpeg 已安装', '视频导出现在可用');
     } catch (cause) {
       notify.fromError(toAppError(cause), 'ffmpeg 安装失败');
     } finally {
+      unlisten?.();
+      percent = null;
       installing = false;
     }
   }
@@ -105,15 +115,26 @@
         <TriangleAlert />
         <Alert.Title>未安装 ffmpeg：视频导出不可用</Alert.Title>
         <Alert.Description>
-          <p>其他功能不受影响。用 Scoop 安装只需一步，不需要管理员权限。</p>
+          {#if status.scoopAvailable}
+            <p>其他功能不受影响。用 Scoop 安装只需一步，不需要管理员权限。</p>
+          {:else}
+            <p>
+              其他功能不受影响。可直接下载固定版本的 ffmpeg（约 109 MB，放到数据目录的 tools\ffmpeg，校验 SHA256）；
+              在「设置 → 更新」开启 GitHub 加速代理后会走代理。
+            </p>
+          {/if}
           <div class="mt-3 flex flex-wrap items-center gap-2">
             <Button size="sm" disabled={installing} onclick={install}>
               <Download class="size-4" />
-              {installing ? '正在用 Scoop 安装…（可能需要几分钟）' : '用 Scoop 安装 ffmpeg'}
+              {#if status.scoopAvailable}
+                {installing ? '正在用 Scoop 安装…（可能需要几分钟）' : '用 Scoop 安装 ffmpeg'}
+              {:else}
+                {installing ? `正在下载… ${percent ?? 0}%` : '下载 ffmpeg'}
+              {/if}
             </Button>
           </div>
           <p class="mt-3">
-            没有 Scoop 时可手动安装：<code class="text-foreground">winget install Gyan.FFmpeg</code>，
+            也可手动安装：<code class="text-foreground">winget install Gyan.FFmpeg</code>，
             或从 ffmpeg.org 下载后把 <code class="text-foreground">bin</code> 目录加入
             <code class="text-foreground">PATH</code>，再点右上角「重新检测」。
           </p>
@@ -124,7 +145,7 @@
     <Card.Root>
       <Card.Header>
         <Card.Title>检测结果</Card.Title>
-        <Card.Description>依次查找：环境变量 AUTOOWL_FFMPEG、程序目录、系统 PATH、Scoop。</Card.Description>
+        <Card.Description>依次查找：环境变量 AUTOOWL_FFMPEG、程序目录、数据目录 tools\ffmpeg、系统 PATH、Scoop。</Card.Description>
       </Card.Header>
       <Card.Content class="space-y-4">
         {#each tools as tool, index (tool.name)}

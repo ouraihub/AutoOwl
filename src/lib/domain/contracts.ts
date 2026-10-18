@@ -439,6 +439,8 @@ export type MediaToolStatus = {
   ffprobePath?: string;
   ffmpegError?: string;
   ffprobeError?: string;
+  /** Scoop installed: offer `scoop install`; otherwise the pinned portable download. */
+  scoopAvailable: boolean;
 };
 
 export type Diagnostics = {
@@ -449,6 +451,19 @@ export type Diagnostics = {
   logDir: string;
   downloadDir: string;
   databaseReady: boolean;
+};
+
+/** Data/logs locations; changes are saved beside the exe and apply after restart. */
+export type StoragePaths = {
+  /** In use by this process. */
+  dataDir: string;
+  logsDir: string;
+  /** Saved choice; empty = default. */
+  dataDirOverride: string;
+  logsDirOverride: string;
+  defaultDataDir: string;
+  defaultLogsDir: string;
+  restartRequired: boolean;
 };
 
 export type UpdateInfo = {

@@ -55,6 +55,10 @@ num-bigint = "0.4"
 qrcode = { version = "0.14", default-features = false }
 rand = "0.8"
 sha1 = "0.10"
+# Already in the tree via tauri-plugin-dialog / other crates; listed directly for
+# the pre-window startup error dialog (rfd) and ffmpeg download checks (sha2).
+rfd = { version = "0.16", default-features = false, features = ["common-controls-v6"] }
+sha2 = "0.10"
 
 # DPAPI for cookies at rest (infrastructure::secret). Same major as tauri's own
 # `windows` dependency, so this adds features, not a second copy of the crate.

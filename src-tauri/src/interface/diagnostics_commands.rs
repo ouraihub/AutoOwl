@@ -16,7 +16,7 @@ pub fn get_diagnostics(state: State<'_, AppState>) -> diagnostics::Diagnostics {
         .database
         .with(|connection| connection.query_row("SELECT 1", [], |row| row.get::<_, i64>(0)))
         .is_ok();
-    diagnostics::current(&state.paths, database_ready)
+    diagnostics::current(&state.paths, &state.download_root(), database_ready)
 }
 
 /// Checks GitHub for a newer release, using the repo and proxy from settings.

@@ -1,6 +1,7 @@
 pub mod collection_repository;
 pub mod credentials;
 pub mod download_repository;
+pub mod ffmpeg_download;
 pub mod filesystem;
 pub mod history_repository;
 pub mod http;

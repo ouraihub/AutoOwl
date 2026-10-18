@@ -28,13 +28,13 @@ pub struct AppState {
 }
 
 impl AppState {
-    /// Builds application state rooted at `root`, persisting to SQLite.
+    /// Builds application state on the resolved data/logs locations, persisting to SQLite.
     ///
-    /// Falls back to an in-memory database when the data directory cannot be
+    /// Falls back to an in-memory database when the database cannot be
     /// opened, so the UI still runs and reports the failure instead of the
     /// process dying at startup.
-    pub fn new(root: std::path::PathBuf) -> Self {
-        let paths = AppPaths::from_root(root);
+    pub fn new(locations: &crate::storage::Locations) -> Self {
+        let paths = AppPaths::from_root(locations.data.clone()).with_logs(locations.logs.clone());
         if let Err(error) = paths.ensure() {
             tracing::error!(event = "data_dir_create_failed", %error);
         }
@@ -111,6 +111,19 @@ impl AppState {
             .map(|settings| settings.clone())
             .unwrap_or_default()
     }
+
+    /// Normalizes, saves to SQLite, then applies in memory. Saving first means a
+    /// failed write leaves the running app on the settings that are on disk.
+    pub fn update_settings(&self, settings: AppSettings) -> Result<AppSettings, String> {
+        let normalized = settings.normalize();
+        crate::infrastructure::settings_repository::save(&self.database, &normalized)
+            .map_err(|error| error.to_string())?;
+        *self
+            .settings
+            .lock()
+            .map_err(|_| "settings lock poisoned".to_owned())? = normalized.clone();
+        Ok(normalized)
+    }
 }
 
 #[cfg(test)]
@@ -132,5 +145,20 @@ mod tests {
             settings.download_dir = "music".to_owned();
         }
         assert!(state.download_root().ends_with("music"));
+    }
+
+    #[test]
+    fn updated_settings_survive_a_restart() {
+        let state = AppState::in_memory();
+        let mut wanted = state.settings_snapshot();
+        wanted.download_dir = r"E:\Music".to_owned();
+        wanted.github_proxy_enabled = true;
+        state.update_settings(wanted).unwrap();
+
+        // What the next launch reads (`AppState::new` loads from the database).
+        let reloaded = crate::infrastructure::settings_repository::load(&state.database).unwrap();
+        assert_eq!(reloaded.download_dir, r"E:\Music");
+        assert!(reloaded.github_proxy_enabled);
+        assert_eq!(state.settings_snapshot().download_dir, r"E:\Music");
     }
 }
