@@ -1,6 +1,9 @@
 <script lang="ts">
   import type { AppSettings } from '$lib/domain/contracts';
   import { settingsStore } from '$lib/stores/settings.svelte';
+  import { settingsService } from '$lib/services/admin/settings-service';
+  import { toAppError } from '$lib/services/errors';
+  import StorageLocations from '$lib/components/admin/StorageLocations.svelte';
   import { notify } from '$lib/stores/toast';
   import { Button } from '$lib/components/ui/button/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
@@ -13,6 +16,7 @@
   import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
   import Save from '@lucide/svelte/icons/save';
   import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
+  import FolderOpen from '@lucide/svelte/icons/folder-open';
 
   /** Editable copy; `null` until the first successful load. */
   let form = $state<AppSettings | null>(null);
@@ -67,6 +71,16 @@
   async function retry(): Promise<void> {
     settingsStore.clearError();
     await settingsStore.load();
+  }
+
+  async function pickDownloadDir(): Promise<void> {
+    if (form === null) return;
+    try {
+      const folder = await settingsService.pickFolder(form.downloadDir);
+      if (folder && form) form.downloadDir = folder;
+    } catch (cause) {
+      notify.fromError(toAppError(cause), '无法打开文件夹选择');
+    }
   }
 </script>
 
@@ -135,7 +149,13 @@
       <Card.Content class="space-y-6">
         <div class="space-y-2">
           <Label for="download-dir">下载目录</Label>
-          <Input id="download-dir" bind:value={form.downloadDir} placeholder="例如 D:\Music" />
+          <div class="flex gap-2">
+            <Input id="download-dir" bind:value={form.downloadDir} placeholder="默认：数据目录下的 downloads" />
+            <Button variant="outline" size="icon" aria-label="选择下载目录" onclick={pickDownloadDir}>
+              <FolderOpen class="size-4" />
+            </Button>
+          </div>
+          <p class="text-muted-foreground text-xs">保存后立即生效；可选任意可写文件夹。</p>
         </div>
 
         <div class="space-y-2">
@@ -189,6 +209,8 @@
         </div>
       </Card.Content>
     </Card.Root>
+
+    <StorageLocations />
 
     <Card.Root>
       <Card.Header>

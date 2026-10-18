@@ -1,10 +1,7 @@
 use std::path::{Path, PathBuf};
 
-/// Filesystem layout for the application data directory.
-///
-/// A `data/` layout (settings.db + downloads/) rooted in
-/// the platform application data directory instead of the process working
-/// directory, per `docs/工程规范与质量门禁.md` section 8.
+/// Filesystem layout under the data directory (see `crate::storage` for where
+/// that directory is and how the user moves it).
 #[derive(Debug, Clone)]
 pub struct AppPaths {
     pub root: PathBuf,
@@ -13,6 +10,8 @@ pub struct AppPaths {
     pub downloads: PathBuf,
     pub cache: PathBuf,
     pub video_output: PathBuf,
+    /// Tools AutoOwl downloads itself, e.g. `tools\ffmpeg`.
+    pub tools: PathBuf,
 }
 
 impl AppPaths {
@@ -23,8 +22,21 @@ impl AppPaths {
             downloads: root.join("downloads"),
             cache: root.join("cache"),
             video_output: root.join("video_output"),
+            tools: root.join("tools"),
             root,
         }
+    }
+
+    /// Logs may live outside the data directory (`autoowl.paths.json` `logsDir`).
+    #[must_use]
+    pub fn with_logs(mut self, logs: PathBuf) -> Self {
+        self.logs = logs;
+        self
+    }
+
+    /// Where the portable ffmpeg download lands.
+    pub fn ffmpeg_dir(&self) -> PathBuf {
+        self.tools.join("ffmpeg")
     }
 
     /// Creates every directory the application writes to.

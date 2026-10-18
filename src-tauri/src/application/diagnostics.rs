@@ -22,14 +22,20 @@ pub struct Diagnostics {
 }
 
 /// Builds the report from the real paths and a live database probe.
-pub fn current(paths: &crate::config::AppPaths, database_ready: bool) -> Diagnostics {
+/// `download_dir` is the effective one (setting resolved against the data dir),
+/// not the built-in default: that is where files actually land.
+pub fn current(
+    paths: &crate::config::AppPaths,
+    download_dir: &Path,
+    database_ready: bool,
+) -> Diagnostics {
     Diagnostics {
         app_version: env!("CARGO_PKG_VERSION").to_owned(),
         platform: std::env::consts::OS.to_owned(),
         arch: std::env::consts::ARCH.to_owned(),
         data_dir: display(&paths.root),
         log_dir: display(&paths.logs),
-        download_dir: display(&paths.downloads),
+        download_dir: display(download_dir),
         database_ready,
     }
 }

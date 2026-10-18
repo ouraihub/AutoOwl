@@ -12,22 +12,27 @@ pub mod infrastructure;
 pub mod interface;
 mod logging;
 pub mod state;
+pub mod storage;
 
 /// Default MCP port; the settings page can change it (persisted in `mcp-server.db`).
 const MCP_PORT: u16 = 37661;
 
 pub fn run() {
+    // Data and logs live beside the exe unless autoowl.paths.json says otherwise.
+    // An unwritable location stops startup with a dialog: falling back elsewhere
+    // would split the user's data across two places.
+    let locations = match storage::resolve() {
+        Ok(locations) => locations,
+        Err(message) => return startup_failed(&message),
+    };
+    let root = locations.data.clone();
     // Before the builder, so plugin setup is logged too. A windowed release build
     // has no console, which is why logs must go to a file.
-    let root = logging::data_root();
-    let logs = match logging::init(&root) {
+    let logs = match logging::init(&locations.logs) {
         Ok(logs) => logs,
-        Err(error) => {
-            eprintln!("autoowl: logging failed to start: {error}");
-            return;
-        }
+        Err(error) => return startup_failed(&format!("日志无法启动：{error}")),
     };
-    tracing::info!(event = "app_start", path = %root.display(), "AutoOwl starting");
+    tracing::info!(event = "app_start", data = %root.display(), logs = %locations.logs.display(), "AutoOwl starting");
 
     // MCP server (external AI) and in-app chat share one tool catalogue
     // (interface::mcp). Model keys live in providers.db, history in chat.db.
@@ -73,7 +78,9 @@ pub fn run() {
         .setup(move |app| {
             use tauri::Manager;
             tracing::info!(event = "data_root_resolved", path = %root.display());
-            app.manage(state::AppState::new(root.clone()));
+            let state = state::AppState::new(&locations);
+            infrastructure::media_tool::set_downloaded_dir(state.paths.ffmpeg_dir());
+            app.manage(state);
             app.manage(host.clone());
             interface::mcp::bind_app(app.handle().clone());
             Ok(())
@@ -115,6 +122,11 @@ pub fn run() {
             interface::settings_commands::update_settings,
             interface::settings_commands::get_media_tool_status,
             interface::settings_commands::install_media_tools,
+            interface::settings_commands::install_portable_ffmpeg,
+            interface::storage_commands::get_storage_paths,
+            interface::storage_commands::set_storage_paths,
+            interface::storage_commands::pick_folder,
+            interface::storage_commands::restart_app,
             interface::render_commands::start_video_render,
             interface::diagnostics_commands::get_diagnostics,
             interface::diagnostics_commands::check_update,
@@ -149,4 +161,15 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .unwrap_or_else(|error| tracing::error!(event = "app_run_failed", %error));
+}
+
+/// Startup cannot continue: show why in a native dialog (a windowed release
+/// build has no console, and the Tauri window does not exist yet).
+fn startup_failed(message: &str) {
+    eprintln!("autoowl: {message}");
+    rfd::MessageDialog::new()
+        .set_level(rfd::MessageLevel::Error)
+        .set_title("AutoOwl 无法启动")
+        .set_description(message)
+        .show();
 }
