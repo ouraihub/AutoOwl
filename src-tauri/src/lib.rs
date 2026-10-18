@@ -1,4 +1,3 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 // `unwrap_used`/`expect_used` are denied crate-wide for production code
 // (docs/工程规范与质量门禁.md §50-51). Tests are exempt: a panic there is the
 // failure report, and `--all-targets` must stay clean under `-D warnings`.
