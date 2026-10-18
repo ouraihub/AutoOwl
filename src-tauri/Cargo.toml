@@ -27,12 +27,12 @@ rusqlite = { version = "0.40", features = ["bundled", "fallible_uint"] }
 # Shared desktop kit (github.com/ouraihub/Aether, same pinning as AutoNote): rotating
 # file logs, the loopback MCP server, in-app AI chat (providers + chat), and the
 # Tauri plugin behind their settings UI. Bump every `rev` together with
-# `@ouraihub/aether-ui` in package.json.
-aether-observability = { git = "https://github.com/ouraihub/Aether.git", rev = "d7391853cf6427ca3014f7b75d782e655532d3c7" }
-aether-mcp-server = { git = "https://github.com/ouraihub/Aether.git", rev = "d7391853cf6427ca3014f7b75d782e655532d3c7" }
-aether-providers = { git = "https://github.com/ouraihub/Aether.git", rev = "d7391853cf6427ca3014f7b75d782e655532d3c7" }
-aether-chat = { git = "https://github.com/ouraihub/Aether.git", rev = "d7391853cf6427ca3014f7b75d782e655532d3c7" }
-tauri-plugin-aether = { git = "https://github.com/ouraihub/Aether.git", rev = "d7391853cf6427ca3014f7b75d782e655532d3c7", features = ["mcp-server", "providers", "chat"] }
+# `@ouraihub/aether-ui` and `@ouraihub/aether-presets` in package.json.
+aether-observability = { git = "https://github.com/ouraihub/Aether.git", rev = "3a3f5675d85e87b39a1dda2591d532cff5aef6fb" }
+aether-mcp-server = { git = "https://github.com/ouraihub/Aether.git", rev = "3a3f5675d85e87b39a1dda2591d532cff5aef6fb" }
+aether-providers = { git = "https://github.com/ouraihub/Aether.git", rev = "3a3f5675d85e87b39a1dda2591d532cff5aef6fb" }
+aether-chat = { git = "https://github.com/ouraihub/Aether.git", rev = "3a3f5675d85e87b39a1dda2591d532cff5aef6fb" }
+tauri-plugin-aether = { git = "https://github.com/ouraihub/Aether.git", rev = "3a3f5675d85e87b39a1dda2591d532cff5aef6fb", features = ["mcp-server", "providers", "chat"] }
 reqwest = { version = "0.12", default-features = false, features = [
   "rustls-tls",
   "json",

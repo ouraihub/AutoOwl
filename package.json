@@ -41,7 +41,8 @@
   },
   "dependencies": {
     "@lucide/svelte": "1.46.0",
-    "@ouraihub/aether-ui": "github:ouraihub/Aether#d7391853cf6427ca3014f7b75d782e655532d3c7&path:packages/ui",
+    "@ouraihub/aether-presets": "github:ouraihub/Aether#3a3f5675d85e87b39a1dda2591d532cff5aef6fb&path:packages/presets",
+    "@ouraihub/aether-ui": "github:ouraihub/Aether#3a3f5675d85e87b39a1dda2591d532cff5aef6fb&path:packages/ui",
     "@tauri-apps/api": "^2.12.3",
     "bits-ui": "2.19.5",
     "shadcn-svelte": "1.7.0"

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { McpServerSettings } from '@ouraihub/aether-ui/mcp';
   import { ProvidersSettings } from '@ouraihub/aether-ui/providers';
-  import { PROVIDER_PRESETS } from '$lib/ai/presets';
+  import { CHINA_PROVIDER_PRESETS } from '@ouraihub/aether-presets';
 </script>
 
 <div class="mx-auto flex max-w-4xl flex-col gap-8 p-6">
@@ -12,7 +12,7 @@
         「AI 对话」需要一个模型服务：添加服务商、填 API Key 并启用一个模型。Key 加密保存在本机。
       </p>
     </header>
-    <ProvidersSettings presets={PROVIDER_PRESETS} />
+    <ProvidersSettings presets={CHINA_PROVIDER_PRESETS} />
   </section>
 
   <section class="flex flex-col gap-4">

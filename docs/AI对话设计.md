@@ -68,7 +68,7 @@ flowchart LR
 
 ### 4.2 预设服务商
 
-与 AutoNote 相同的三个：七牛云、硅基流动、Fenno（`src/lib/ai/presets.ts`）。由 `ProvidersSettings` 首次打开时写入一次，默认停用、没有 Key，用户填 Key 并启用即可。
+用 Aether 的共享预设 `@ouraihub/aether-presets` 中的 `CHINA_PROVIDER_PRESETS`：七牛云、硅基流动、Fenno。由 `ProvidersSettings` 首次打开时写入一次，默认停用、没有 Key，用户填 Key 并启用即可。预设随 Aether 版本更新，AutoOwl 不另存一份。
 
 数据：`providers.db`（模型服务与 API Key，Key 由 Aether 用 DPAPI 加密）、`chat.db`（会话历史），都在数据目录下，与 `mcp-server.db` 同级。
 

@@ -25,8 +25,8 @@ autoowl-cli status
 
 日志：数据目录 `logs/autoowl.log`，「日志」页可查看和调级别；`RUST_LOG` 环境变量优先。
 
-Aether 按提交固定（与 AutoNote 相同做法）：`src-tauri/Cargo.toml` 里所有 Aether crate 的 `rev` 与
-`package.json` 中 `@ouraihub/aether-ui` 的 `#<commit>` 必须同步升级。构建不需要本地 Aether 目录。
+Aether 按提交固定（与 AutoNote 相同做法）：`src-tauri/Cargo.toml` 里所有 Aether crate 的 `rev`，与
+`package.json` 中 `@ouraihub/aether-ui`、`@ouraihub/aether-presets` 的 `#<commit>` 必须同步升级。构建不需要本地 Aether 目录。
 
 ## 开发
 
