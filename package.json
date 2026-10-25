@@ -13,14 +13,22 @@
     "test": "vitest run",
     "lint": "svelte-check --tsconfig ./tsconfig.json",
     "tauri": "tauri",
-    "tauri:dev": "scripts\\tauri-dev.bat",
-    "tauri:build": "scripts\\tauri-build.bat",
-    "build:app": "scripts\\build-app.bat",
-    "clean": "scripts\\clean.bat",
-    "verify": "powershell -ExecutionPolicy Bypass -File scripts/verify.ps1"
+    "dev:app": "desktop-kit dev",
+    "build:app": "desktop-kit build",
+    "clean": "desktop-kit clean",
+    "fmt:rust": "desktop-kit cargo fmt -- --check",
+    "clippy": "desktop-kit cargo clippy --all-targets --all-features -- -D warnings",
+    "test:rust": "desktop-kit cargo test",
+    "verify": "pnpm check && pnpm lint && pnpm test && pnpm fmt:rust && pnpm clippy && pnpm test:rust && pnpm build"
+  },
+  "desktopKit": {
+    "platforms": ["windows"],
+    "portable": { "format": "exe" },
+    "release": { "notes": "release-notes.md", "generateNotes": true }
   },
   "devDependencies": {
     "@internationalized/date": "^3.12.3",
+    "@ouraihub/desktop-kit": "github:ouraihub/desktop-kit#c7c8281885dc0e88293abda4f67fd5570dee37db",
     "@sveltejs/adapter-static": "^3.0.8",
     "@sveltejs/kit": "2.70.2",
     "@sveltejs/vite-plugin-svelte": "7.3.0",

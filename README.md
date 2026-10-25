@@ -31,17 +31,17 @@ Aether 按提交固定（与 AutoNote 相同做法）：`src-tauri/Cargo.toml` �
 ## 开发
 
 设计文档：`docs/概要设计.md`、`docs/详细设计.md`、`docs/AI对话设计.md`；规范见 `docs/工程规范与质量门禁.md`。
-Windows 构建脚本用法见 `scripts/README.md`。
 
-检查：
+构建、清理和 MSVC 环境由 [desktop-kit](https://github.com/ouraihub/desktop-kit) 提供。Windows 首次使用：`pnpm install`，再运行
+`node_modules\@ouraihub\desktop-kit\msvc\setup-msvc.bat` 下载便携 MSVC（默认 `D:\Applications\msvc-portable\msvc`，可用
+`PORTABLE_MSVC_ROOT` 修改）。Rust 工具链由 `src-tauri/rust-toolchain.toml` 固定为 1.92.0 MSVC，本机默认是 GNU 也不受影响。
 
 ```powershell
-pnpm check
-pnpm test
-scripts\cargo-msvc.bat fmt -- --check
-scripts\cargo-msvc.bat clippy --all-targets --all-features -- -D warnings
-scripts\cargo-msvc.bat test
-scripts\build-app.bat
+pnpm verify        # 全部门禁：check、lint、test、cargo fmt/clippy/test、pnpm build
+pnpm dev:app       # tauri dev
+pnpm build:app     # 门禁 + 安装包和便携 exe → dist\candidate-windows\，并更新 dist\AutoOwl\autoowl.exe
+pnpm clean         # 删除编译产物（保留 data\）；--deep 连 node_modules 一起删
+pnpm exec desktop-kit cargo <参数>   # 其他 cargo 命令，自动带 MSVC 和 manifest
 ```
 
 ## 许可证

@@ -1,0 +1,6 @@
+# The machine-default rustup toolchain may be GNU (needs dlltool.exe); Tauri on Windows needs MSVC.
+[toolchain]
+channel = "1.92.0"
+profile = "minimal"
+components = ["clippy", "rustfmt"]
+targets = ["x86_64-pc-windows-msvc"]
