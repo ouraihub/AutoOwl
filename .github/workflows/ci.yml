@@ -21,7 +21,12 @@ jobs:
           toolchain: 1.92.0
           components: rustfmt, clippy
       - run: pnpm install --frozen-lockfile
-      # Puts the runner's MSVC (cl.exe, link.exe) on PATH; scripts/cargo-msvc.bat then
-      # skips the local portable-MSVC path. Same approach as Aether's CI.
+      # Puts the runner's MSVC (cl.exe, link.exe) on PATH; desktop-kit uses it instead of
+      # the local portable MSVC and checks the compiler paths belong to the runner.
       - uses: ilammy/msvc-dev-cmd@v1
-      - run: powershell -ExecutionPolicy Bypass -File scripts/verify.ps1
+        with:
+          arch: x64
+      - name: Enforce runner compiler ownership
+        shell: cmd
+        run: call node_modules\@ouraihub\desktop-kit\msvc\msvc-env.bat
+      - run: pnpm run verify
