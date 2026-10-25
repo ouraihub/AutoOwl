@@ -1,5 +1,7 @@
 # AutoOwl
 
+[![CI](https://github.com/ouraihub/AutoOwl/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ouraihub/AutoOwl/actions/workflows/ci.yml)
+
 [GitHub](https://github.com/ouraihub/AutoOwl) · Rust + Tauri 2 + Svelte 5 的桌面音乐应用：12 个平台聚合搜索、在线播放、批量下载与标签写入，并可让 AI 帮你搜歌、放歌。
 
 ## 让 AI 帮你搜歌、放歌
